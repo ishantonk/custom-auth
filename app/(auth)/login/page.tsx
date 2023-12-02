@@ -3,6 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import axios from "axios";
+import { useRouter } from "next/navigation";
 
 interface FormDataProps {
     email: string;
@@ -15,7 +16,10 @@ const initialFormData: FormDataProps = {
 };
 
 const LoginPage = () => {
+    const router = useRouter();
     const [formData, setFormData] = useState(initialFormData);
+    const [error, setError] = useState("");
+    const [loading, setLoading] = useState(false);
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const { name, value } = e.target;
@@ -24,9 +28,25 @@ const LoginPage = () => {
 
     const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
-        const { email, password } = formData;
-
-        // Todo: Add validation and error handling and response and redirect
+        
+        try {
+            setLoading(true);
+            const { email, password } = formData;
+            const response = await axios.post("/api/login", {
+                email,
+                password,
+            });
+            if (response.status === 200) {
+                router.push("/");
+            } else {
+                setError("Login failed");
+            }
+        } catch (error) {
+            setError("Login failed");
+            console.log(error);
+        } finally {
+            setLoading(false);
+        }
     };
     return (
         <section>
@@ -52,7 +72,7 @@ const LoginPage = () => {
                     />
                 </div>
                 <div>
-                    <button type="submit">Login</button>
+                    <button disabled={loading} name="login" type="submit">Login</button>
                 </div>
             </form>
             <p>

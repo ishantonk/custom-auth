@@ -3,6 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import axios from "axios";
+import { useRouter } from "next/navigation";
 
 interface FormDataProps {
     name: string;
@@ -19,7 +20,10 @@ const initialFormData: FormDataProps = {
 };
 
 const SignupPage = () => {
+    const router = useRouter();
     const [formData, setFormData] = useState(initialFormData);
+    const [error, setError] = useState("");
+    const [loading, setLoading] = useState(false);
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const { name, value } = e.target;
@@ -28,9 +32,32 @@ const SignupPage = () => {
 
     const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
-        const { name, email, password, confirmPassword } = formData;
 
-        // Todo: Add validation and error handling and response and redirect
+        try {
+            setLoading(true);
+            const { name, email, password, confirmPassword } = formData;
+            if (password !== confirmPassword) {
+                setError("Passwords do not match");
+                return;
+            } else {
+                const response = await axios.post("/api/signup", {
+                    name,
+                    email,
+                    password,
+                });
+                if (response.status === 201) {
+                    router.push("/login");
+                } else {
+                    setError("Something went wrong");
+                }
+            }
+        } catch (error) {
+            setError("Something went wrong");
+            console.log(error);
+        } finally {
+            setLoading(false);
+            console.log("error", error);
+        }
     };
     return (
         <section>

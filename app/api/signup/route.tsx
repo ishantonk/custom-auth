@@ -4,6 +4,8 @@ import User from "@/app/models/userModels";
 import connect from "@/utils/config/database";
 
 export async function POST(request: NextRequest) {
+    connect(); // connect to database
+
     try {
         const body = await request.json();
         const { name, email, password } = body;
@@ -30,8 +32,6 @@ export async function POST(request: NextRequest) {
                 { status: 409 }
             );
         } else {
-            await connect(); // connect to database
-
             const salt = await bcrypt.genSalt(10);
             const hashedPassword = await bcrypt.hash(password, salt);
 
@@ -48,6 +48,7 @@ export async function POST(request: NextRequest) {
             );
         }
     } catch (error) {
+        console.log(error);
         return NextResponse.json(
             {
                 message: "Internal Server Error",
