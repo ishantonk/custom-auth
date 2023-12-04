@@ -40,7 +40,7 @@ const SignupPage = () => {
                 setError("Passwords do not match");
                 return;
             } else {
-                const response = await axios.post("/api/signup", {
+                const response = await axios.post("/api/auth/signup", {
                     name,
                     email,
                     password,
