@@ -32,7 +32,7 @@ const LoginPage = () => {
         try {
             setLoading(true);
             const { email, password } = formData;
-            const response = await axios.post("/api/login", {
+            const response = await axios.post("/api/auth/login", {
                 email,
                 password,
             });

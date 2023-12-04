@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import bcrypt from "bcrypt";
-import User from "@/app/models/userModels";
 import connect from "@/utils/config/database";
+import { User } from "@/app/models";
 
 export async function POST(request: NextRequest) {
     connect(); // connect to database

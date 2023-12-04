@@ -1,13 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
 import bcrypt from "bcrypt";
-import jwt from "jsonwebtoken";
-import User from "@/app/models/userModels";
-import Token from "@/app/models/tokenModel";
-import connect from "@/utils/config/database";
+import { User, Token } from "@/app/models";
+import { getNewToken, createToken } from "@/utils/helpers";
 
 export async function POST(request: NextRequest) {
-    connect(); // connect to database
-
     try {
         const body = await request.json();
         const { email, password } = body;
@@ -32,76 +28,66 @@ export async function POST(request: NextRequest) {
                     { status: 404 }
                 );
             } else if (await bcrypt.compare(password, user.password)) {
-                // save authentication token in database
-                const authenticationTokenData = {
-                    _id: user._id,
-                    email: user.email,
-                    password: user.password,
-                };
+                // check if user already has an existing tokens
+                const existingTokenList = await Token.find({
+                    userId: user._id,
+                });
+                console.log(existingTokenList);
 
-                const authenticationToken = jwt.sign(
-                    authenticationTokenData,
-                    process.env.JWT_SECRET!,
-                    {
-                        expiresIn: "1d",
-                    }
-                );
+                if (existingTokenList.length > 0) {
+                    existingTokenList.forEach(async (token) => {
+                        await token.updateOne({ revoked: true });
+                    });
+                }
 
-                const newAuthenticationToken = new Token({
+                // create and saving token in database
+                const authenticationToken = getNewToken({
+                    type: "authentication",
+                    data: {
+                        _id: user._id,
+                        email: user.email,
+                        password: user.password,
+                    },
+                });
+                const accessToken = getNewToken({
+                    type: "access",
+                    data: {
+                        _id: user._id,
+                        authenticationToken: authenticationToken,
+                    },
+                });
+
+                const refreshToken = getNewToken({
+                    type: "recovery",
+                    data: {
+                        _id: user._id,
+                        authenticationToken: authenticationToken,
+                    },
+                });
+
+                await createToken({
                     userId: user._id,
                     token: authenticationToken,
                     type: "authentication",
-                    expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000),
                     ipAddress: request.ip,
                     clientInfo: request.headers.get("User-Agent"),
                 });
-                await newAuthenticationToken.save();
 
-                // save access token in database
-                const accessTokenData = {
-                    _id: user._id,
-                    authenticationToken: authenticationToken,
-                };
-                const accessToken = jwt.sign(
-                    accessTokenData,
-                    process.env.JWT_SECRET!,
-                    {
-                        expiresIn: "1d",
-                    }
-                );
-
-                const newAccessToken = new Token({
+                await createToken({
                     userId: user._id,
                     token: accessToken,
                     type: "access",
-                    expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000),
                     ipAddress: request.ip,
                     clientInfo: request.headers.get("User-Agent"),
                 });
-                await newAccessToken.save();
 
-                // save refresh token in database
-                const refreshTokenData = {
-                    _id: user._id,
-                    authenticationToken: authenticationToken,
-                };
-                const refreshToken = jwt.sign(
-                    refreshTokenData,
-                    process.env.JWT_SECRET!,
-                    {
-                        expiresIn: "7d",
-                    }
-                );
-
-                const newRefreshToken = new Token({
+                await createToken({
                     userId: user._id,
                     token: refreshToken,
                     type: "refresh",
-                    expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
                     ipAddress: request.ip,
                     clientInfo: request.headers.get("User-Agent"),
                 });
-                await newRefreshToken.save();
 
                 const response = NextResponse.json(
                     {
@@ -114,7 +100,7 @@ export async function POST(request: NextRequest) {
                 response.cookies.set({
                     name: "authenticationToken",
                     value: authenticationToken,
-                    maxAge: 24 * 60 * 60,
+                    maxAge: 60 * 60,
                     httpOnly: true,
                 });
 
