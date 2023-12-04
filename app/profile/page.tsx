@@ -21,6 +21,15 @@ export default function ProfilePage() {
         }
     };
 
+    const handleUserVerification = async () => {
+        try {
+            const response = await axios.get("/api/auth/verify");
+            console.log(response.data);
+        } catch (error) {
+            console.error(error);
+        }
+    }
+
     const handleLogout = async () => {
         try {
             await axios.get("/api/auth/logout");

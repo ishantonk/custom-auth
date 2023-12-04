@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import bcrypt from "bcrypt";
 import connect from "@/utils/config/database";
 import { User } from "@/app/models";
+import { createToken, getNewToken, sendEmail } from "@/utils/helpers";
 
 export async function POST(request: NextRequest) {
     connect(); // connect to database
@@ -37,6 +38,30 @@ export async function POST(request: NextRequest) {
 
             const newUser = new User({ name, email, password: hashedPassword });
             await newUser.save();
+
+            const verificationToken = getNewToken({
+                type: "verification",
+                data: {
+                    _id: newUser._id,
+                    email: newUser.email,
+                },
+            });
+
+            await createToken({
+                userId: newUser._id,
+                token: verificationToken!,
+                type: "verification",
+                ipAddress: request.ip,
+                clientInfo: request.headers.get("User-Agent"),
+            });
+
+            await sendEmail({
+                address: email,
+                subject: "Account Verification",
+                html: `<h1>Please verify your account</h1>
+            <p>Click the link below to verify your account</p>
+            <a href="${process.env.DOMAIN}/api/auth/verify?token=${verificationToken}">Verify Account</a>`,
+            });
 
             return NextResponse.json(
                 {

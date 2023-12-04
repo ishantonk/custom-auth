@@ -1,5 +1,5 @@
 type tokenType = {
-    type: "authentication" | "access" | "refresh" | "recovery"
+    type: "authentication" | "access" | "refresh" | "recovery" | "verification";
 };
 
 export default tokenType;

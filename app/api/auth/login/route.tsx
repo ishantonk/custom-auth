@@ -67,7 +67,7 @@ export async function POST(request: NextRequest) {
 
                 await createToken({
                     userId: user._id,
-                    token: authenticationToken,
+                    token: authenticationToken!,
                     type: "authentication",
                     ipAddress: request.ip,
                     clientInfo: request.headers.get("User-Agent"),
@@ -75,7 +75,7 @@ export async function POST(request: NextRequest) {
 
                 await createToken({
                     userId: user._id,
-                    token: accessToken,
+                    token: accessToken!,
                     type: "access",
                     ipAddress: request.ip,
                     clientInfo: request.headers.get("User-Agent"),
@@ -83,7 +83,7 @@ export async function POST(request: NextRequest) {
 
                 await createToken({
                     userId: user._id,
-                    token: refreshToken,
+                    token: refreshToken!,
                     type: "refresh",
                     ipAddress: request.ip,
                     clientInfo: request.headers.get("User-Agent"),

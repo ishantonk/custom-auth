@@ -70,6 +70,17 @@ const createToken = async ({
                             expiry || new Date(Date.now() + 30 * 60 * 1000), // 30 minutes
                     });
                     return await recoveryToken.save();
+                case "verification":
+                    const verificationToken = new Token({
+                        userId,
+                        token,
+                        type,
+                        ipAddress,
+                        clientInfo,
+                        expiresAt:
+                            expiry || new Date(Date.now() + 10 * 60 * 1000), // 10 minutes
+                    });
+                    return await verificationToken.save();
                 default:
                     return new Error("Invalid token type");
             }
