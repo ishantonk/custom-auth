@@ -27,6 +27,8 @@ export async function POST(request: NextRequest) {
                 expiresAt: { $gt: new Date() },
             });
 
+            console.log(verifiedDbToken, "verifiedDbToken", request.ip, "ip");
+
             if (!verifiedDbToken) {
                 return NextResponse.json(
                     {
@@ -55,6 +57,9 @@ export async function POST(request: NextRequest) {
                 } else {
                     // update token
                     await verifiedDbToken.updateOne({ revoked: true });
+
+                    // update user
+                    await user.updateOne({ verified: true });
 
                     const response = NextResponse.json(
                         {

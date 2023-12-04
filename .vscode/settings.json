@@ -3,6 +3,7 @@
         "lucide",
         "maxlength",
         "signup",
-        "tailwindcss"
+        "tailwindcss",
+        "verifyemail"
     ]
 }

@@ -27,6 +27,12 @@ const getNewToken = ({
             return jwt.sign(data, process.env.JWT_SECRET!, {
                 expiresIn: lifespan || "30m",
             });
+        case "verification":
+            return jwt.sign(data, process.env.JWT_SECRET!, {
+                expiresIn: lifespan || "10m",
+            });
+        default:
+            throw new Error("Invalid token type");
     }
 };
 
