@@ -28,7 +28,7 @@ export default function VerifyEmailPage() {
             setLoading(true);
             const verifyEmail = async () => {
                 try {
-                    const response = await axios.post("/api/auth/verify", {
+                    const response = await axios.post("/api/account/verify", {
                         token,
                     });
 

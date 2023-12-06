@@ -2,22 +2,21 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import axios from "axios";
 import { useRouter } from "next/navigation";
+import axios from "axios";
 
-interface FormDataProps {
+interface formDataProps {
     email: string;
-    password: string;
 }
 
-const initialFormData: FormDataProps = {
+const initialFormData: formDataProps = {
     email: "",
-    password: "",
 };
 
-const LoginPage = () => {
+export default function ForgetPasswordPage() {
     const router = useRouter();
     const [formData, setFormData] = useState(initialFormData);
+    const [success, setSuccess] = useState(false);
     const [error, setError] = useState("");
     const [loading, setLoading] = useState(false);
 
@@ -31,25 +30,28 @@ const LoginPage = () => {
 
         try {
             setLoading(true);
-            const { email, password } = formData;
-            const response = await axios.post("/api/account/login", {
+            const { email } = formData;
+            const response = await axios.post("/api/account/recovery", {
                 email,
-                password,
             });
             if (response.status === 200) {
-                router.push("/");
+                setSuccess(true);
+                console.log("success");
             } else {
-                setError("Login failed");
+                setError("Something went wrong");
             }
         } catch (error) {
-            setError("Login failed");
+            setError("Something went wrong");
             console.log(error);
         } finally {
             setLoading(false);
         }
     };
+
     return (
         <section>
+            <h1>Forget Password</h1>
+            {loading && <p>Please wait your request is being processed.</p>}
             <form action="" method="post" onSubmit={handleSubmit}>
                 <div>
                     <label htmlFor="email">Email</label>
@@ -62,29 +64,15 @@ const LoginPage = () => {
                     />
                 </div>
                 <div>
-                    <label htmlFor="password">Password</label>
-                    <input
-                        type="password"
-                        name="password"
-                        id="password"
-                        value={formData.password}
-                        onChange={handleChange}
-                    />
-                </div>
-                <div>
-                    <button disabled={loading} name="login" type="submit">
-                        Login
-                    </button>
+                    <button type="submit">Submit</button>
                 </div>
             </form>
+            {(success && <p>Check your email to reset your password.</p>) || (
+                <p>{error}</p>
+            )}
             <p>
-                Don&apos;t remember your password? <Link href="/forget-password">Forget password</Link>
-            </p>
-            <p>
-                Don&apos;t have an account? <Link href="/signup">Signup</Link>
+                Remember your password? <Link href="/login">Login</Link>
             </p>
         </section>
     );
-};
-
-export default LoginPage;
+}

@@ -14,7 +14,7 @@ export default function ProfilePage() {
 
     const getUserData = async () => {
         try {
-            const response = await axios.get("/api/auth/user");
+            const response = await axios.get("/api/account/user");
             console.log(response.data);
         } catch (error) {
             console.error(error);
@@ -23,7 +23,7 @@ export default function ProfilePage() {
 
     const handleUserVerification = async () => {
         try {
-            const response = await axios.get("/api/auth/verify");
+            const response = await axios.get("/api/account/verify");
             console.log(response.data);
         } catch (error) {
             console.error(error);
@@ -32,7 +32,7 @@ export default function ProfilePage() {
 
     const handleLogout = async () => {
         try {
-            await axios.get("/api/auth/logout");
+            await axios.get("/api/account/logout");
             router.push("/login");
         } catch (error) {
             console.error(error);

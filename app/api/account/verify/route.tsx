@@ -27,8 +27,6 @@ export async function POST(request: NextRequest) {
                 expiresAt: { $gt: new Date() },
             });
 
-            console.log(verifiedDbToken, "verifiedDbToken", request.ip, "ip");
-
             if (!verifiedDbToken) {
                 return NextResponse.json(
                     {

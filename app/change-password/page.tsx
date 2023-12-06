@@ -1,27 +1,23 @@
 "use client";
 
-import { useState } from "react";
-import Link from "next/link";
 import axios from "axios";
 import { useRouter } from "next/navigation";
+import { useState } from "react";
 
-interface FormDataProps {
-    name: string;
-    email: string;
+interface formDataProps {
     password: string;
     confirmPassword: string;
 }
 
-const initialFormData: FormDataProps = {
-    name: "",
-    email: "",
+const initialFormData: formDataProps = {
     password: "",
     confirmPassword: "",
 };
 
-const SignupPage = () => {
+const ChangePasswordPage = () => {
     const router = useRouter();
     const [formData, setFormData] = useState(initialFormData);
+    const [success, setSuccess] = useState(false);
     const [error, setError] = useState("");
     const [loading, setLoading] = useState(false);
 
@@ -35,18 +31,30 @@ const SignupPage = () => {
 
         try {
             setLoading(true);
-            const { name, email, password, confirmPassword } = formData;
-            if (password !== confirmPassword) {
+            const { password, confirmPassword } = formData;
+            if (!password || !confirmPassword) {
+                setError("All fields are required");
+                return;
+            } else if (password !== confirmPassword) {
                 setError("Passwords do not match");
                 return;
             } else {
-                const response = await axios.post("/api/account/signup", {
-                    name,
-                    email,
-                    password,
-                });
-                if (response.status === 201) {
-                    router.push("/login");
+                const searchParams = new URLSearchParams(
+                    window.location.search
+                );
+                const token = searchParams.get("token");
+                if (!token) {
+                    setError("Token not found");
+                    return;
+                }
+
+                const response = await axios.post(
+                    "/api/account/change-password",
+                    { password, token }
+                );
+                if (response.status === 200) {
+                    setSuccess(true);
+                    console.log("success");
                 } else {
                     setError("Something went wrong");
                 }
@@ -56,32 +64,14 @@ const SignupPage = () => {
             console.log(error);
         } finally {
             setLoading(false);
-            console.log("error", error);
         }
     };
+
     return (
         <section>
+            <h1>Change Password</h1>
+            {loading && <p>Please wait your request is being processed.</p>}
             <form action="" method="post" onSubmit={handleSubmit}>
-                <div>
-                    <label htmlFor="name">Name</label>
-                    <input
-                        type="text"
-                        name="name"
-                        id="name"
-                        value={formData.name}
-                        onChange={handleChange}
-                    />
-                </div>
-                <div>
-                    <label htmlFor="email">Email</label>
-                    <input
-                        type="email"
-                        name="email"
-                        id="email"
-                        value={formData.email}
-                        onChange={handleChange}
-                    />
-                </div>
                 <div>
                     <label htmlFor="password">Password</label>
                     <input
@@ -102,15 +92,14 @@ const SignupPage = () => {
                         onChange={handleChange}
                     />
                 </div>
-                <button name="submit" type="submit">
-                    SignUp here
-                </button>
+                <div>
+                    <button type="submit">Change Password</button>
+                </div>
             </form>
-            <p>
-                Already have an account? <Link href="/login">Login</Link>
-            </p>
+            {success && <p>Password changed successfully</p>}
+            {error && <p>{error}</p>}
         </section>
     );
 };
 
-export default SignupPage;
+export default ChangePasswordPage;
