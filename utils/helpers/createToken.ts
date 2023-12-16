@@ -1,5 +1,4 @@
 import type { tokenType } from "@/utils/types";
-import connect from "@/utils/config/database";
 import Token from "@/app/models/tokenModel";
 
 const createToken = async ({
@@ -17,7 +16,6 @@ const createToken = async ({
     ipAddress?: String;
     clientInfo?: String | null;
 }) => {
-    connect(); // connect to database
 
     try {
         if (!userId || !token || !type) {

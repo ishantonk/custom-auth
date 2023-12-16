@@ -4,6 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import axios from "axios";
+import { EmailInput, SimpleButton } from "../components";
 
 interface formDataProps {
     email: string;
@@ -28,6 +29,11 @@ export default function ForgetPasswordPage() {
     const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
 
+        if (formData.email === "") {
+            setError("Email is required");
+            return;
+        }
+
         try {
             setLoading(true);
             const { email } = formData;
@@ -49,29 +55,37 @@ export default function ForgetPasswordPage() {
     };
 
     return (
-        <section>
-            <h1>Forget Password</h1>
-            {loading && <p>Please wait your request is being processed.</p>}
-            <form action="" method="post" onSubmit={handleSubmit}>
-                <div>
-                    <label htmlFor="email">Email</label>
-                    <input
-                        type="email"
-                        name="email"
-                        id="email"
-                        value={formData.email}
-                        onChange={handleChange}
-                    />
-                </div>
-                <div>
-                    <button type="submit">Submit</button>
+        <section className="flex flex-col justify-center w-full max-w-md mx-auto p-4 md:p-6 lg:p-8 md:rounded-lg bg-gradient-to-br from-blue-50 to-blue-100">
+            <h1 className="text-2xl font-semibold text-neutral-700 mb-2 text-center">
+                Forget Password
+            </h1>
+            <p className="text-neutral-700 mb-8 text-center">
+                Hey, enter your registered email to reset your password.
+            </p>
+            <form
+                action="/api/account/recovery"
+                method="post"
+                onSubmit={handleSubmit}
+            >
+                <EmailInput
+                    id="signup-email-input"
+                    name="email"
+                    placeholder="Your email address"
+                    label="Email"
+                    value={formData.email}
+                    error={error}
+                    onChange={handleChange}
+                    icon
+                />
+                <div className="my-4">
+                    <SimpleButton Label="Reset password" wFull />
                 </div>
             </form>
-            {(success && <p>Check your email to reset your password.</p>) || (
-                <p>{error}</p>
-            )}
-            <p>
-                Remember your password? <Link href="/login">Login</Link>
+            <p className="text-sm text-neutral-700 mb-1 mt-4 text-center">
+                Remember your password?{" "}
+                <Link href="/login" className="text-blue-500">
+                    Login
+                </Link>
             </p>
         </section>
     );

@@ -4,11 +4,13 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import axios from "axios";
 import Link from "next/link";
+import { Spinner } from "../components";
 
 export default function VerifyEmailPage() {
     const router = useRouter();
     const [error, setError] = useState("");
     const [loading, setLoading] = useState(false);
+    const [success, setSuccess] = useState(false);
     const [token, setToken] = useState("");
 
     useEffect(() => {
@@ -33,6 +35,7 @@ export default function VerifyEmailPage() {
                     });
 
                     if (response.status === 200) {
+                        setSuccess(true);
                         router.push("/login");
                     } else {
                         setError("Verification failed");
@@ -49,14 +52,34 @@ export default function VerifyEmailPage() {
     }, [token, router]);
 
     return (
-        <div>
-            <h1>Verify Email</h1>
-            {error && <p>{error}</p>}
-            {loading && <p>Loading...</p>}
-            {!loading && !error && <p>Verifying email...</p>}
-            {!loading && !error && <p>Email verified successfully</p>}
-            {!loading && !error && <p>Redirecting to login page...</p>}
-            <Link href="/login">Login</Link>
-        </div>
+        <section className="flex flex-col justify-center w-full max-w-md mx-auto p-4 md:p-6 lg:p-8 md:rounded-lg bg-gradient-to-br from-blue-50 to-blue-100">
+            <h1 className="text-2xl font-semibold text-neutral-700 mb-2 text-center">
+                Verifying your email.
+            </h1>
+            <div className="flex flex-row items-center justify-center my-4">
+                {loading && <Spinner loading={loading} />}
+            </div>
+
+            {error && (
+                <p className="text-neutral-700 mb-8 text-center">{error}</p>
+            )}
+
+            {success && (
+                <p className="text-neutral-700 text-center">
+                    Your email has been verified. You can now login.
+                    <br />
+                    Now we are redirecting you to login page.
+                </p>
+            )}
+            <div className="my-4 text-center">
+                Go back to sign in page{" "}
+                <Link
+                    href={"/login"}
+                    className="text-blue-500 text-lg font-semibold"
+                >
+                    Login here
+                </Link>
+            </div>
+        </section>
     );
 }

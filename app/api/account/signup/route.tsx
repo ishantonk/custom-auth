@@ -60,7 +60,7 @@ export async function POST(request: NextRequest) {
                 subject: "Account Verification",
                 html: `<h1>Please verify your account</h1>
             <p>Click the link below to verify your account</p>
-            <a href="${process.env.DOMAIN}/verifyemail?token=${verificationToken}">Verify Account</a>`,
+            <a href="${process.env.DOMAIN}/verify-email?token=${verificationToken}">Verify Account</a>`,
             });
 
             return NextResponse.json(

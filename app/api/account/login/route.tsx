@@ -2,8 +2,10 @@ import { NextRequest, NextResponse } from "next/server";
 import bcrypt from "bcrypt";
 import { User, Token } from "@/app/models";
 import { getNewToken, createToken } from "@/utils/helpers";
+import connect from "@/utils/config/database";
 
 export async function POST(request: NextRequest) {
+    connect(); // connect to database
     try {
         const body = await request.json();
         const { email, password } = body;
@@ -32,7 +34,6 @@ export async function POST(request: NextRequest) {
                 const existingTokenList = await Token.find({
                     userId: user._id,
                 });
-                console.log(existingTokenList);
 
                 if (existingTokenList.length > 0) {
                     existingTokenList.forEach(async (token) => {
@@ -65,6 +66,7 @@ export async function POST(request: NextRequest) {
                     },
                 });
 
+                // !!! to use createToken function make sure to use connect() before calling it.
                 await createToken({
                     userId: user._id,
                     token: authenticationToken!,
@@ -128,17 +130,6 @@ export async function POST(request: NextRequest) {
                     { status: 401 }
                 );
             }
-
-            // Todo: check user is verified
-            // else if (!user.verified) {
-            //     return NextResponse.json(
-            //         {
-            //             message: "Please verify your email",
-            //             success: false,
-            //         },
-            //         { status: 401 }
-            //     );
-            // }
         }
     } catch (error) {
         console.log(error);
@@ -146,7 +137,7 @@ export async function POST(request: NextRequest) {
             {
                 message: "Internal Server Error",
                 success: false,
-                error: error,
+                error: (error as Error).message,
             },
             { status: 500 }
         );
